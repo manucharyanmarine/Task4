@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,15 +31,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.fontResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -60,12 +63,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ScreenContent(applicationContext)
+                    ScreenContent(LocalContext.current)
                 }
             }
         }
     }
 }
+
+//scrol landscape
 
 @Composable
 fun ScreenContent(context: Context) {
@@ -95,20 +100,20 @@ fun LoginContainer(
     context: Context
 ) {
     val pageHeader = painterResource(id = R.drawable.ic_login_header)
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisibility by remember { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVisibility by rememberSaveable { mutableStateOf(false) }
     val icon = if (passwordVisibility)
         painterResource(id = R.drawable.ic_visibility)
     else
         painterResource(id = R.drawable.ic_visibility_off)
 
-    val typeface = fontResource(FontFamily(Font(R.font.serif_regular)))
-    val fontFamily = FontFamily(typeface)
+    val fontFamily = FontFamily(Font(R.font.serif_regular, FontWeight.Normal))
 
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Image(
@@ -123,7 +128,7 @@ fun LoginContainer(
             )
         }
         Text(
-            text = "Login",
+            text = stringResource(R.string.login),
             style = TextStyle(
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
@@ -140,7 +145,7 @@ fun LoginContainer(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text(text = "Email") },
+            label = { Text(text = stringResource(R.string.email)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = if (isLandscape) 48.dp else 24.dp)
@@ -149,7 +154,7 @@ fun LoginContainer(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text(text = "Password") },
+            label = { Text(text = stringResource(R.string.password)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = if (isLandscape) 48.dp else 24.dp),
@@ -157,7 +162,7 @@ fun LoginContainer(
                 IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
                     Icon(
                         painter = icon,
-                        contentDescription = "Visible"
+                        contentDescription = stringResource(R.string.visible)
                     )
                 }
             },
@@ -179,7 +184,7 @@ fun LoginContainer(
                     contentColor = Color.White
                 )
             ) {
-                Text(text = "Login")
+                Text(text = context.getString(R.string.login))
             }
         }
 
@@ -190,35 +195,33 @@ fun LoginContainer(
             contentAlignment = Alignment.Center
 
         ) {
-            val icFacebook = painterResource(id = R.drawable.ic_login_fb)
-            val icInstagram = painterResource(id = R.drawable.ic_login_ig)
-            val icGoogle = painterResource(id = R.drawable.ic_login_google)
-
             Row(
-                modifier = Modifier.width(200.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.width(200.dp)
             ) {
                 Image(
-                    painter = icFacebook,
+                    painter = painterResource(id = R.drawable.ic_login_fb),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
+                        .padding(end = 10.dp)
                         .width(55.dp)
                         .height(55.dp)
                 )
                 Image(
-                    painter = icGoogle,
+                    painter = painterResource(id = R.drawable.ic_login_google),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
+                        .padding(end = 10.dp)
                         .width(55.dp)
                         .height(55.dp)
                 )
                 Image(
-                    painter = icInstagram,
+                    painter = painterResource(id = R.drawable.ic_login_ig),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
+                        .padding(end = 10.dp)
                         .width(55.dp)
                         .height(55.dp)
                 )
@@ -231,7 +234,8 @@ fun buttonClick(
     email: String, password: String, context: Context
 ) {
     if (email.isNotEmpty() && password.isNotEmpty()) {
-        Toast.makeText(context, "Button Clicked", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, context.getString(R.string.button_clicked), Toast.LENGTH_LONG)
+            .show()
     }
 }
 
@@ -240,6 +244,6 @@ fun buttonClick(
 fun BackgroundPreview() {
     Task4Theme {
         BackgroundImage()
-//        LoginContainer()
+        LoginContainer(LocalContext.current)
     }
 }
